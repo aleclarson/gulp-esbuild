@@ -35,14 +35,14 @@ module.exports = function(options = {}) {
 
 			const {outputFiles} = data
 
-			outputFiles.forEach(it => {
-				const file = new Vinyl({
-					path: it.path,
-					contents: Buffer.from(it.contents),
-				})
-
-				this.push(file)
-			})
+			outputFiles.forEach(file =>
+				this.push(
+					new Vinyl({
+						path: file.path,
+						contents: Buffer.from(file.contents),
+					})
+				)
+			)
 
 			cb(null)
 		},

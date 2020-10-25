@@ -57,4 +57,5 @@ interface BuildOptions extends CommonOptions {
 	entryPoints?: string[]
 }
 
-export = (options: BuildOptions) => stream.Transform
+declare const gulpEsbuild: (options: BuildOptions) => stream.Transform
+export = gulpEsbuild

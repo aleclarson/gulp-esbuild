@@ -20,6 +20,10 @@ module.exports = function (options = {}) {
       cb(null)
     },
     async flush(cb) {
+      if (!entryPoints.length) {
+        return cb(null)
+      }
+
       try {
         var data = await build({
           ...options,

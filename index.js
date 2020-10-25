@@ -6,7 +6,7 @@ const Vinyl = require('vinyl')
 const PLUGIN_NAME = 'gulp-esbuild'
 
 module.exports = function(options = {}) {
-	const entries = []
+	const entryPoints = options.entryPoints || []
 
 	return new Transform({
 		objectMode: true,
@@ -15,16 +15,14 @@ module.exports = function(options = {}) {
 				return cb(null)
 			}
 			if (file.isBuffer() || file.isStream()) {
-				const path = file.history[file.history.length - 1]
-				entries.push(path)
+				entryPoints.push(file.path)
 			}
 			cb(null)
 		},
 		async flush(cb) {
-			const entry = options.entryPoints || entries
 			const params = {
 				...options,
-				entryPoints: entry,
+				entryPoints,
 				write: false,
 			}
 			let data

@@ -2,6 +2,7 @@ const { Transform } = require('stream')
 const { build } = require('esbuild')
 const PluginError = require('plugin-error')
 const Vinyl = require('vinyl')
+const path = require('path')
 
 const PLUGIN_NAME = 'gulp-esbuild'
 
@@ -26,6 +27,7 @@ module.exports = function (options = {}) {
 
       try {
         var data = await build({
+          outdir: path.dirname(entryPoints[0]),
           ...options,
           entryPoints,
           write: false,

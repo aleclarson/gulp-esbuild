@@ -11,15 +11,13 @@ module.exports = function(options = {}) {
 	return new Transform({
 		objectMode: true,
 		transform(file, _, cb) {
-			if (!file.isBuffer() && !file.isStream()) {
-				return cb(new PluginError(PLUGIN_NAME, new TypeError('file should be a buffer')))
+			if (options.entryPoints) {
+				return cb(null)
 			}
-
-			if (!options.entryPoints) {
+			if (file.isBuffer() || file.isStream()) {
 				const path = file.history[file.history.length - 1]
 				entries.push(path)
 			}
-
 			cb(null)
 		},
 		async flush(cb) {

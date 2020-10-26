@@ -15,6 +15,7 @@ module.exports = (options = {}) =>
 
       try {
         var { outputFiles } = await build({
+          logLevel: 'silent',
           outdir: file.dirname,
           ...options,
           entryPoints,

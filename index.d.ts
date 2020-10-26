@@ -38,9 +38,7 @@ interface CommonOptions {
 interface BuildOptions extends CommonOptions {
 	bundle?: boolean
 	splitting?: boolean
-	outfile?: string
 	metafile?: string
-	outdir?: string
 	platform?: Platform
 	external?: string[]
 	loader?: {

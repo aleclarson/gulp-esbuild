@@ -23,11 +23,9 @@ interface CommonOptions {
   jsxFragment?: string
 }
 
-interface BuildOptions extends CommonOptions {
-  platform?: Platform
-  tsconfig?: string
-  inject?: string[]
+interface TransformOptions extends CommonOptions {
+  loader?: Loader
 }
 
-declare const gulpEsbuild: (options: BuildOptions) => stream.Transform
+declare const gulpEsbuild: (options: TransformOptions) => stream.Transform
 export = gulpEsbuild

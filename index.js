@@ -1,5 +1,5 @@
 const { Transform } = require('stream')
-const { build } = require('esbuild')
+const { transform } = require('esbuild')
 const PluginError = require('plugin-error')
 const Vinyl = require('vinyl')
 
@@ -9,44 +9,37 @@ module.exports = (options = {}) =>
   new Transform({
     objectMode: true,
     async transform(file, _, cb) {
-      if (file.isDirectory()) {
+      if (!file.isBuffer()) {
         return cb(null)
       }
 
+      const input = file.contents.toString('utf8')
       try {
-        var { outputFiles } = await build({
-          logLevel: 'silent',
-          outdir: file.dirname,
+        var output = await transform(input, {
           ...options,
-          entryPoints,
-          write: false,
+          sourcefile: file.path,
+          loader: file.extname.slice(1),
         })
       } catch (err) {
         return cb(new PluginError(PLUGIN_NAME, err))
       }
 
-      const outputMaps =
-        options.sourcemap == 'external' &&
-        outputFiles.filter(file => file.path.endsWith('.map'))
+      const outPath = file.path.replace(/\.ts(x)?$/, '.js$1')
+      this.push(createFile(outPath, output.js, file))
 
-      if (outputMaps) {
-        outputFiles = outputFiles.filter(file => !outputMaps.includes(file))
+      if (options.sourcemap == 'external') {
+        const mapPath = outPath + '.map'
+        this.push(createFile(mapPath, output.jsSourceMap, file))
       }
-
-      outputFiles.forEach((file, i) => {
-        const entryFile = entryFiles[i]
-        this.push(createFile(file, entryFile))
-        outputMaps && this.push(createFile(outputMaps[i], entryFile))
-      })
 
       cb(null)
     },
   })
 
-const createFile = (output, { base, cwd }) =>
+const createFile = (filePath, contents, { base, cwd }) =>
   new Vinyl({
-    path: output.path,
-    contents: Buffer.from(output.contents),
+    path: filePath,
+    contents: Buffer.from(contents),
     base,
     cwd,
   })

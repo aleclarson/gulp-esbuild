@@ -2,32 +2,20 @@ const { Transform } = require('stream')
 const { build } = require('esbuild')
 const PluginError = require('plugin-error')
 const Vinyl = require('vinyl')
-const path = require('path')
 
 const PLUGIN_NAME = 'gulp-esbuild'
 
-module.exports = function (options = {}) {
-  const entryPoints = options.entryPoints || []
-
-  return new Transform({
+module.exports = (options = {}) =>
+  new Transform({
     objectMode: true,
-    transform(file, _, cb) {
-      if (options.entryPoints) {
-        return cb(null)
-      }
-      if (file.isBuffer() || file.isStream()) {
-        entryPoints.push(file.path)
-      }
-      cb(null)
-    },
-    async flush(cb) {
-      if (!entryPoints.length) {
+    async transform(file, _, cb) {
+      if (file.isDirectory()) {
         return cb(null)
       }
 
       try {
-        var data = await build({
-          outdir: path.dirname(entryPoints[0]),
+        var { outputFiles } = await build({
+          outdir: file.dirname,
           ...options,
           entryPoints,
           write: false,
@@ -36,7 +24,7 @@ module.exports = function (options = {}) {
         return cb(new PluginError(PLUGIN_NAME, err))
       }
 
-      data.outputFiles.forEach(file =>
+      outputFiles.forEach(file =>
         this.push(
           new Vinyl({
             path: file.path,
@@ -48,4 +36,3 @@ module.exports = function (options = {}) {
       cb(null)
     },
   })
-}

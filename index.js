@@ -25,15 +25,28 @@ module.exports = (options = {}) =>
         return cb(new PluginError(PLUGIN_NAME, err))
       }
 
-      outputFiles.forEach(file =>
-        this.push(
-          new Vinyl({
-            path: file.path,
-            contents: Buffer.from(file.contents),
-          })
-        )
-      )
+      const outputMaps =
+        options.sourcemap == 'external' &&
+        outputFiles.filter(file => file.path.endsWith('.map'))
+
+      if (outputMaps) {
+        outputFiles = outputFiles.filter(file => !outputMaps.includes(file))
+      }
+
+      outputFiles.forEach((file, i) => {
+        const entryFile = entryFiles[i]
+        this.push(createFile(file, entryFile))
+        outputMaps && this.push(createFile(outputMaps[i], entryFile))
+      })
 
       cb(null)
     },
+  })
+
+const createFile = (output, { base, cwd }) =>
+  new Vinyl({
+    path: output.path,
+    contents: Buffer.from(output.contents),
+    base,
+    cwd,
   })

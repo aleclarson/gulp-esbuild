@@ -52,7 +52,6 @@ interface BuildOptions extends CommonOptions {
 	}
 	publicPath?: string
 	inject?: string[]
-	entryPoints?: string[]
 }
 
 declare const gulpEsbuild: (options: BuildOptions) => stream.Transform
